@@ -1,5 +1,6 @@
 import tweepy
 from tweepy import OAuthHandler
+import json
 
 def main(args=None):
     # The main routine
@@ -13,8 +14,8 @@ def main(args=None):
       
     api = tweepy.API(auth)
 
-    for status in tweepy.Cursor(api.home_timeline).items(10):
-        print(status.text)
+    for tweet in tweepy.Cursor(api.user_timeline).items(10):
+        print(json.dumps(tweet._json))
     
 
 
