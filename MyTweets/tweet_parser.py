@@ -1,6 +1,7 @@
 import tweepy
 from tweepy import OAuthHandler
 import json
+import os
 import pandas as pd
 import numpy as np
 
@@ -17,19 +18,40 @@ def main(args=None):
     auth.set_access_token(access_token, access_secret)
 
     api = tweepy.API(auth)
+    filename = 'tweets.json'
+    most_recent_tweet = ""
+    most_recent_saved_tweet = ""
 
-    output_file = open('tweets.json', 'w')
-    mylist = []
+    for tweet in tweepy.Cursor(api.user_timeline).items(1):
+        most_recent_tweet = tweet._json
 
-    for tweet in tweepy.Cursor(api.user_timeline).items(10):
-        mylist.append(tweet._json)
-    
-    process_and_write(mylist, output_file)
+    if os.path.isfile(filename):
+        most_recent_saved_tweet = open(filename, 'r').readline()
 
-def process_and_write(tweets, out_file):
-    for item in tweets:
-        out_file.write(json.dumps(item) + "\n")
-    #out_file.write(json.dumps(tweet))
+    if grab_id_dict(most_recent_tweet) != grab_id_string(most_recent_saved_tweet):
+        os.remove(filename)
+        write_tweets_timeline(filename, api)
+
+
+def write_tweets_timeline(filename, api):
+    print("Grabbing all of your tweets, this may take a minute...")
+    with open(filename, 'a') as f:
+        for tweet in tweepy.Cursor(api.user_timeline).items():
+            json.dump(tweet._json, f)
+            f.write("\n")
+
+
+def grab_id_string(tweet):
+    try:
+        x = tweet.split(", ")[1]
+        id = x.split(" ")[1]
+        return int(id)
+    except IndexError:
+        return None
+
+
+def grab_id_dict(tweet):
+    return tweet["id"]
 
 if __name__ == "__main__":
     main()
