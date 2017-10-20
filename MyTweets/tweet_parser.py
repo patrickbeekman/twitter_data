@@ -7,6 +7,7 @@ import numpy as np
 
 def main(args=None):
     # The main routine
+    df = pd.DataFrame()
     keys = open('keys.txt', 'r')
     keys.readline() #skip the first line of comments
     consumer_key = keys.readline().rstrip()
@@ -32,6 +33,32 @@ def main(args=None):
         os.remove(filename)
         write_tweets_timeline(filename, api)
 
+    tweetsDict = []
+    f = open(filename, 'r')
+    for line in f.readlines():
+        tweetsDict.append(json.loads(line))
+
+    df = populate_tweet_df(tweetsDict)
+
+    print(df['created_at'])
+
+def populate_tweet_df(tweets):
+    df = pd.DataFrame()
+
+    df['created_at'] = list(map(lambda tweet: tweet['created_at'], tweets))
+
+    df['text'] = list(map(lambda tweet: tweet['text'], tweets))
+
+    df['location'] = list(map(lambda tweet: tweet['user']['location'], tweets))
+
+    df['name'] = list(map(lambda tweet: tweet['user']['name'], tweets))
+
+    df['followers_count'] = list(map(lambda tweet: tweet['user']['followers_count'], tweets))
+
+    #df['country_code'] = list(map(lambda tweet: tweet['place']['country_code']
+    #if tweet['place'] != None else '', tweets))
+
+    return df
 
 def write_tweets_timeline(filename, api):
     print("Grabbing all of your tweets, this may take a minute...")
