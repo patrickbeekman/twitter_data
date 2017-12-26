@@ -40,7 +40,7 @@ def main(args=None):
 
     df = populate_tweet_df(tweetsDict)
 
-    print(df['created_at'])
+    print(df['text'])
 
 def populate_tweet_df(tweets):
     df = pd.DataFrame()
