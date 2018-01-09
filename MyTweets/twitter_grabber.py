@@ -16,7 +16,7 @@ def main(args=None):
         search_params = {
             'q': 'General Election',
             'result_type': 'recent',
-            'count': 2
+            'count': 15
         }
         tweet_data = query(bearer_token, search_params, '1.1/search/tweets.json')
 
@@ -41,9 +41,10 @@ def query(bearer_tok, params, endpoint):
         for x in tweet_data['statuses']:
             print(x['text'] + '\n')
         return tweet_data
+        print(len(tweet_data))
     else:
         return None
-    
+ 
 def check_status(status_code):
     '''
     check_status: Checks whether the response status is successful or not
