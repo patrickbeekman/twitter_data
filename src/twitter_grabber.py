@@ -12,6 +12,11 @@ base_url = 'https://api.twitter.com/'
 
 def main(args=None):
     bearer_token = authorize('keys.txt')
+    if bearer_token is not None:
+        tweets = get_usertimeline(bearer_token, 'grauson420')
+        write_to_file('graysons_tweets.txt', tweets)
+
+    '''
     if bearer_token != None:
         search_params = {
             'q': 'General Election',
@@ -19,6 +24,35 @@ def main(args=None):
             'count': 15
         }
         tweet_data = query(bearer_token, search_params, '1.1/search/tweets.json')
+    '''
+
+
+def get_usertimeline(token, username):
+    search_params = {
+        'screen_name': str(username),
+        'count': 100
+    }
+    tweet_data = query(token, search_params, '1.1/statuses/user_timeline.json')
+    len_new = 100
+    while len_new >= 1:
+        print(str(len(tweet_data)))
+        search_params = {
+            'screen_name': str(username),
+            'since_id': tweet_data[len(tweet_data)-1]['id'],
+            'count': 100
+        }
+        new_data = query(token, search_params, '1.1/statuses/user_timeline.json')
+        len_new = len(new_data)
+        tweet_data += new_data
+
+    return tweet_data
+
+
+def write_to_file(filename, data):
+    file = open(filename, 'a')
+    for x in data:
+        file.write(x['text'] + '\n')
+
 
 def query(bearer_tok, params, endpoint):
     '''
@@ -28,20 +62,16 @@ def query(bearer_tok, params, endpoint):
     :param endpoint: The endpoint location we will access on the api
     :return: All the requested information in json format
     '''
-    search_headers = {
+    headers = {
         'Authorization': 'Bearer {}'.format(bearer_tok)
     }
 
-    search_url = base_url + endpoint
-    search_resp = requests.get(search_url, headers=search_headers, params=params)
+    api_path = base_url + endpoint
+    resp = requests.get(api_path, headers=headers, params=params)
 
-    # If the request connects correctly then print the tweets statuses
-    if check_status(search_resp.status_code):
-        tweet_data = search_resp.json()
-        for x in tweet_data['statuses']:
-            print(x['text'] + '\n')
+    if check_status(resp.status_code):
+        tweet_data = resp.json()
         return tweet_data
-        print(len(tweet_data))
     else:
         return None
  
