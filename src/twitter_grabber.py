@@ -4,6 +4,7 @@ A direct way to access the twitter RESTful api to grab twitter data for further 
 '''
 import base64
 import requests
+import json
 import os
 import pandas as pd
 import numpy as np
@@ -15,7 +16,7 @@ def main(args=None):
     bearer_token = authorize('keys.txt')
     if bearer_token is not None:
         tweets = get_user_timeline(bearer_token, 'grauson420')
-        write_to_file('graysons_tweets.txt', tweets)
+        write_to_file('graysons_tweets(1).txt', tweets)
 
     '''
     if bearer_token != None:
@@ -61,9 +62,13 @@ def write_to_file(filename, data):
     :param filename: the file to write to
     :param data: a python mapped object of tweets
     """
-    file = open(filename, 'a')
-    for x in data:
-        file.write(x['text'] + '\n')
+    # if file doesn't exist then create it and open it
+    file = open(filename, 'a+')
+    file.seek(0)
+    json.dump(data, file)
+    #for x in data:
+        #file.write(x)
+        #file.write(x['text'] + '\n')
 
 
 def query(bearer_tok, params, endpoint):
@@ -83,6 +88,7 @@ def query(bearer_tok, params, endpoint):
 
     if check_status(resp.status_code):
         tweet_data = resp.json()
+
         return tweet_data
     else:
         return None
